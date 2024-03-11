@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Chat App</title>
+</head>
+<body>
+  <h1>My Chat App</h1>
+  <h2>Welcome {% if current_user.is_authenticated %} {{current_user.username}} {% else %} Guest {% endif %}</h2>
+
+  {% if rooms %}
+    <ul>
+      {% for room in rooms %}
+      <li><a href="/rooms/{{room._id.room_id}}">{{room.room_name}}</a></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+</body>
+</html>
