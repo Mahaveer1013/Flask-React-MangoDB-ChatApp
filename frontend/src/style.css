@@ -4,15 +4,48 @@
   margin: 0;
   padding: 0;
 }
+
+::-webkit-scrollbar{
+  width: 0 !important;
+  height: 0 !important;
+}
+
 body{
   font-family: 'Poppins', sans-serif
 }
 .main-div{
   display: flex;
 }
-/* .fcc{
+.fcc{
   display: flex;
   align-items: center;
   justify-content: center;
-} */
+}
+.loading-screen{
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  z-index: 100;
+  backdrop-filter: blur(3px);
+}
+
+.flash-msg-div{
+  height: 20px;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  justify-content: start;
+  padding: 15px;
+  background-color: #65687a;
+  /* color: white; */
+}
+.flash-msg{
+  margin-left: 40px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgb(255, 206, 12);
+}
+.success{
+  color: greenyellow;
+}
 

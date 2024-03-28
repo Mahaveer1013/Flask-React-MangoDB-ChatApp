@@ -1,81 +1,83 @@
-from flask import Flask,session,render_template,request,redirect,url_for
-from flask_login import LoginManager,login_user,logout_user,login_required,current_user
+from flask import Flask,session,render_template,request,redirect,url_for,jsonify
 from bson.json_util import dumps
 from flask_socketio import SocketIO,join_room
 from db import *
 from datetime import datetime
 from user import *
 from pymongo.errors import *
+from flask_cors import CORS
+
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager, current_user
 
 app=Flask(__name__)
+CORS(app)
 socketio=SocketIO(app)
-login_manager=LoginManager()
-login_manager.login_view='login'
-login_manager.init_app(app)
-app.config['SECRET_KEY'] = 'your_secret_key_here'
+app.config['SECRET_KEY'] = '1234567890poiuytrewqgdc'
 
-@login_manager.user_loader
-def load_user(username):
-    return get_user(username)
+app.config["JWT_SECRET_KEY"] = "qwertyu1234567890poiuytrewqgdc"  # Change this!
+jwt = JWTManager(app)
 
-@app.route('/')
-def home():
-    rooms=[]
-    if current_user.is_authenticated:
-        rooms=get_rooms_for_user(current_user.username)
-        print('rooms \n',rooms)
-    return render_template('index.html',rooms=rooms)
 
-@app.route('/login',methods=['POST','GET'])
+@jwt.user_identity_loader
+def user_identity_lookup(username):
+    return username
+# @login_manager.user_loader
+# def load_user(username):
+#     return get_user(username)
+    # return User.query.get(username)
+
+# @app.route('/')
+# def home():
+#     rooms=[]
+#     if current_user.is_authenticated:
+#         rooms=get_rooms_for_user(current_user.username)
+#         print('rooms \n',rooms)
+#     return render_template('index.html',rooms=rooms)
+
+@app.route('/api/getCurrentUser',methods=['GET'])
+@jwt_required
+def getCurrentUser():
+    current_user=get_jwt_identity()
+    return jsonify(logged_in_as=current_user),200
+
+@app.route('/api/login',methods=['POST','GET'])
 def login():
-    message=''
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
+    data=request.json
     if request.method=='POST':
-        username=request.form.get('username')
-        password=request.form.get('password')
+        username=data.get('username')
+        password=data.get('password')
         user=get_user(username)
         if user:
-            print('user found\n\n')
             if user.check_password(password):
-                print('password right \n\n')
-                login_user(user)
-                return redirect(url_for('home'))
+                user=find_user(username)
+                access_token=create_access_token(identity=user)
+                return jsonify(access_token=access_token)
             else:
                 print('wrong pass')
+                return jsonify({'message':'Wrong Password', 'status':'error'}),401
         else:
-            message='failed to login'
-        return render_template('login.html',message=message)
+            return jsonify({'message':'User Not Found', 'status':'error'}),401
 
-    return render_template('login.html')
+    return jsonify({'message':'Improper Request (Not POST)', 'status':'error'}),502
 
-@app.route('/signup',methods=['POST','GET'])
+@app.route('/api/signup',methods=['POST'])
 def signup():
-    message=''
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-    if request.method=='POST':
-        username=request.form.get('username')
-        email=request.form.get('email')
-        password=request.form.get('password')
-        try:
-            save_user(username,email,password)
-            return redirect('/login')
-        except DuplicateKeyError:
-            message='Username Already Exists'
+    data=request.json    
+    username = data['username']
+    email = data['email']
+    password = data['password']
+    print(username,email,password)
+    try:
+        save_user(username,email,password)
+        return jsonify({'status':True, 'message':'Logged In Successfully'}),200
+    except DuplicateKeyError:
+        return jsonify({'status':False, 'message':'Username Already Exists'}),403
             
-            
-    return render_template('signup.html',message=message)
-
-    # return render_template('login.html')
-
-
-
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
+# @app.route('/logout')
+# @login_required
+# def logout():
+#     logout_user()
+#     return redirect(url_for('login'))
 
 @app.route('/create-room',methods=['POST','GET'])
 @login_required

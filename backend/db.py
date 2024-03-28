@@ -23,8 +23,13 @@ def save_user(username,email,password):
 
 def get_user(username):
     user_data = users_collection.find_one({'_id':username})
-    print('user data\n',user_data)
+    # print('user data\n',user_data)
     return User(user_data['_id'], user_data['email'], user_data['password']) if user_data else None
+
+def find_user(username):
+    user_data = users_collection.find_one({'_id':username})
+    # print('user data\n',user_data)
+    return user_data if user_data else None
 
 def save_room(room_name,created_by): 
     room_id=(rooms_collection.insert_one({'room_name':room_name, 

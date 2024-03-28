@@ -1,20 +1,23 @@
-import React from "react"
+import React, { useContext } from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {  faCircleInfo, faGear, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faRightFromBracket, faGear, faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
+import { AuthContext } from '../pages/Main'
 
 
-export default function Header(props) {
+export default function Header() {
 
-  function handleMoreOption() {
-      
-    }
-  console.log(props);
+  // const [isMoreOption, setIsMoreOption] = useState({
+  //   info: false,
+  //   settings: false,
+  //   more:false
+  // });
+
+  const useAuthContext = useContext(AuthContext)
 
     return (
       <div className="header">
-        {/* <FontAwesomeIcon icon={faBars}></FontAwesomeIcon> */}
         <div className="chat--title">
-            {props.name}
+            {useAuthContext.userDet.username}
         </div>
         <div className="chat--options">
             <div className="chat-option">
@@ -23,13 +26,12 @@ export default function Header(props) {
             <div className="chat-option">
               <FontAwesomeIcon icon={faGear}></FontAwesomeIcon>
             </div>
-            <div className="chat-option logout-div" onMouseOver={handleMoreOption}>
+            <div className="chat-option">
               <FontAwesomeIcon icon={faEllipsisVertical}></FontAwesomeIcon>
             </div>
-          <button
-            className="logout-btn"
-            onClick={()=>props.handleLogout() }
-          >Logout</button>
+            <div className="chat-option logout-div" onClick={() => useAuthContext.setIsAuthenticated(false)}>
+              <FontAwesomeIcon icon={faRightFromBracket} />
+            </div>
         </div>
       </div>
     )

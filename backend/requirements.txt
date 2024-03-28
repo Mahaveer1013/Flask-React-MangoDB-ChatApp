@@ -3,3 +3,4 @@ Flask-Login
 Flask-SocketIO
 eventlet
 Pymongo
+flask_cors
